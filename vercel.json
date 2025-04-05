@@ -1,10 +1,10 @@
 {
   "functions": {
-    "api/ytmp3.py": {
+    "api/main.py": {
       "runtime": "python3.9"
     }
   },
   "routes": [
-    { "src": "/api/ytmp3", "dest": "api/ytmp3.py" }
+    { "src": "/api/ytmp3", "dest": "api/main.py" }
   ]
 }
