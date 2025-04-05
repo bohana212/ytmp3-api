@@ -6,6 +6,10 @@ import os
 app = Flask(__name__)
 CORS(app)
 
+@app.route('/')
+def home():
+    return 'API YouTube to MP3 aktif!'
+
 @app.route('/api/ytmp3', methods=['GET'])
 def download_mp3():
     url = request.args.get('url')
@@ -33,6 +37,5 @@ def download_mp3():
 
     return send_file(filename, as_attachment=True)
 
-# Handler buat Vercel
-def handler(request):
-    return app(request)
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=8080)
