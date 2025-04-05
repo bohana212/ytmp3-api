@@ -16,6 +16,8 @@ def download_mp3():
     if not url:
         return jsonify({'error': 'URL tidak ada'}), 400
 
+    search_query = url if "youtube.com" in url or "youtu.be" in url else f"ytsearch:{url}"
+
     ydl_opts = {
         'format': 'bestaudio/best',
         'outtmpl': '/tmp/%(title)s.%(ext)s',
@@ -30,7 +32,7 @@ def download_mp3():
 
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=True)
+            info = ydl.extract_info(search_query, download=True)
             filename = ydl.prepare_filename(info).replace(".webm", ".mp3").replace(".m4a", ".mp3")
     except Exception as e:
         return jsonify({'error': str(e)}), 500
