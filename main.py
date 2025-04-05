@@ -6,6 +6,8 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
+app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 10000)))
+
 @app.route('/api/ytmp3')
 def download_mp3():
     url = request.args.get('url')
