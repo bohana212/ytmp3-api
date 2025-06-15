@@ -1,43 +1,44 @@
 from flask import Flask, request, jsonify, send_file
-from flask_cors import CORS
 import yt_dlp
+import uuid
 import os
 
 app = Flask(__name__)
-CORS(app)
+DOWNLOAD_DIR = 'downloads'
+os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
 @app.route('/')
 def home():
-    return 'API YouTube to MP3 aktif!'
+    return '🟢 YT-MP3 Server Aktif'
 
-@app.route('/api/ytmp3', methods=['GET'])
-def download_mp3():
-    url = request.args.get('url')
+@app.route('/api/ytmp3', methods=['POST'])
+def ytmp3():
+    data = request.get_json()
+    url = data.get('url')
+
     if not url:
-        return jsonify({'error': 'URL tidak ada'}), 400
+        return jsonify({'error': 'URL tidak ditemukan'}), 400
 
-    search_query = url if "youtube.com" in url or "youtu.be" in url else f"ytsearch:{url}"
+    file_id = str(uuid.uuid4())
+    output_path = f"{DOWNLOAD_DIR}/{file_id}.mp3"
 
     ydl_opts = {
         'format': 'bestaudio/best',
-        'outtmpl': '/tmp/%(title)s.%(ext)s',
+        'outtmpl': output_path,
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'mp3',
             'preferredquality': '192',
         }],
-        'quiet': True,
-        'noplaylist': True
+        'quiet': True
     }
 
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(search_query, download=True)
-            filename = ydl.prepare_filename(info).replace(".webm", ".mp3").replace(".m4a", ".mp3")
+            ydl.download([url])
+        return send_file(output_path, as_attachment=True)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-    return send_file(filename, as_attachment=True)
-
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8000)))
+    app.run(host='0.0.0.0', port=8080)
